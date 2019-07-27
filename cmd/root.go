@@ -66,24 +66,31 @@ var rootCmd = &cobra.Command{
 	Short: "Git helper",
 	Long:  `Git helper assists with learning git by providing documentation and shortcuts.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println()
-		fmt.Println("MAIN MENU")
 
-		showGhCommands(ghMap, 8)
+		for {
+			fmt.Println()
+			fmt.Println("MAIN MENU")
 
-		// fmt.Println("a. Amend last commit")
-		// fmt.Println("b. Pull with rebase")
-		// fmt.Println("c. Clear local git cache (git rm -r --cached .)")
-		// fmt.Println("d. Reset local branch (git reset --hard origin/some-topic-branch)")
-		// fmt.Println("e. Recreate branch from master (ask local and remote)")
-		// fmt.Println("f. View origin (git remote -v)")
-		input := charChoice()
+			showGhCommands(ghMap, 8)
 
-		ghc, ok := ghMap[input]
+			// fmt.Println("a. Amend last commit")
+			// fmt.Println("b. Pull with rebase")
+			// fmt.Println("c. Clear local git cache (git rm -r --cached .)")
+			// fmt.Println("d. Reset local branch (git reset --hard origin/some-topic-branch)")
+			// fmt.Println("e. Recreate branch from master (ask local and remote)")
+			// fmt.Println("f. View origin (git remote -v)")
+			input := charChoiceOption()
 
-		if ok && ghc.cobraCommand != nil {
-			cmd.RemoveCommand(ghc.cobraCommand) // remove command from root to allow it to run on its own
-			ghc.cobraCommand.Execute()
+			if input == 0 {
+				return
+			}
+
+			ghc, ok := ghMap[input]
+
+			if ok && ghc.cobraCommand != nil {
+				cmd.RemoveCommand(ghc.cobraCommand) // remove command from root to allow it to run on its own
+				ghc.cobraCommand.Execute()
+			}
 		}
 
 		// switch input {
@@ -124,13 +131,18 @@ func Execute() {
 	}
 }
 
-func charChoice() rune {
+func charChoiceOption() rune {
 	fmt.Print("Option: ")
 	return readChar()
 }
 
-func stringChoice() string {
+func stringChoiceOptions() string {
 	fmt.Print("Options: ")
+	return readString()
+}
+
+func stringChoice(prompt string) string {
+	fmt.Print(prompt)
 	return readString()
 }
 

@@ -29,13 +29,15 @@ import (
 )
 
 var configCommands = []ghCommand{
-	ghCommand{"name", "Name of config to add/list/remove.", nil},
-	ghCommand{"value", "Value of config to add. Must follow name and requires --add.", nil},
-	ghCommand{"--list", "List all config values.", nil},
-	ghCommand{"--show-origin", "Source of settings. Requires --list.", nil},
-	ghCommand{"--add", "Add config. Requires name and value.", nil},
-	ghCommand{"--unset", "Remove config. Requires name.", nil},
-	ghCommand{"--global", "Global config. Requires --list or --add.", nil},
+	ghCommand{name: "name", description: "Show config setting for given name."},
+	ghCommand{name: "add/change", description: "Add config setting or change existing. \"user.name\" and \"user.email\" are common settings."},
+	ghCommand{name: "--list", description: "List all config values."},
+	ghCommand{name: "--show-origin", description: "Source of settings. Requires --list."},
+	ghCommand{name: "--add", description: "Add config setting."},
+	ghCommand{name: "--replace-all", description: "Replace all rows with given name using new value."},
+	ghCommand{name: "--unset", description: "Remove config setting."},
+	ghCommand{name: "--global", description: "Read or write only global config settings. Requires --list to read, name/value to set, or name/--unset to remove."},
+	ghCommand{name: "--local", description: "Read or write only local config settings. Requires --list to read, name/value to set, or name/--unset to remove."},
 }
 
 var configMap = createGhMap(configCommands)
@@ -49,20 +51,47 @@ and the key separated by a dot, and the value will be escaped.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println()
 		fmt.Println("CONFIG MENU")
-		showGhCommands(configMap, 12)
+		showGhCommands(configMap, 13)
 
-		input := stringChoice()
+		input := stringChoiceOptions()
 
-		shellArgs := []string{"config"}
+		shellArgs := []string{}
+
+		if input == "" {
+			return
+		}
 
 		for i := 0; i < len(input); i++ {
 			ghCommand := configMap[rune(input[i])]
-			shellArgs = append(shellArgs, ghCommand.name)
+
+			switch ghCommand.name {
+			case "name":
+				name := stringChoice("Enter name: ")
+				shellArgs = append(shellArgs, name)
+			case "add/change", "--add", "--replace-all":
+				name := stringChoice("Enter name: ")
+				if ghCommand.name == "set" {
+					shellArgs = append(shellArgs, name)
+				} else {
+					shellArgs = append(shellArgs, ghCommand.name, name)
+				}
+				value := stringChoice("Enter value: ")
+				shellArgs = append(shellArgs, value)
+			case "--unset":
+				unset := stringChoice("Enter name to remove: ")
+				shellArgs = append(shellArgs, "--unset", unset)
+			case "--global", "--local":
+				shellArgs = append([]string{ghCommand.name}, shellArgs...)
+			default:
+				shellArgs = append(shellArgs, ghCommand.name)
+			}
 		}
+
+		shellArgs = append([]string{"config"}, shellArgs...)
 
 		fullCommand := strings.Join(shellArgs, " ")
 
-		fmt.Printf("\ngit %v\n\nExecute? (Y/n)", fullCommand)
+		fmt.Printf("\ngit %v\n\nExecute? (Y/n) ", fullCommand)
 
 		executeFlag := readString()
 
