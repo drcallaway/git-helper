@@ -1,0 +1,1 @@
+go build -i -o $GOPATH/bin/gh
