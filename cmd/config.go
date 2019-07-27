@@ -23,15 +23,17 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
 var configCommands = []ghCommand{
-	ghCommand{name: "name", description: "Show config setting for given name."},
+	ghCommand{name: "show value", description: "Show config setting for given name."},
 	ghCommand{name: "add/change", description: "Add config setting or change existing. \"user.name\" and \"user.email\" are common settings."},
-	ghCommand{name: "--list", description: "List all config values."},
+	ghCommand{name: "--list", description: "List all config values. Defaults to --local settings."},
 	ghCommand{name: "--show-origin", description: "Source of settings. Requires --list."},
 	ghCommand{name: "--add", description: "Add config setting."},
 	ghCommand{name: "--replace-all", description: "Replace all rows with given name using new value."},
@@ -65,12 +67,12 @@ and the key separated by a dot, and the value will be escaped.`,
 			ghCommand := configMap[rune(input[i])]
 
 			switch ghCommand.name {
-			case "name":
+			case "show value":
 				name := stringChoice("Enter name: ")
 				shellArgs = append(shellArgs, name)
 			case "add/change", "--add", "--replace-all":
 				name := stringChoice("Enter name: ")
-				if ghCommand.name == "set" {
+				if ghCommand.name == "add/change" {
 					shellArgs = append(shellArgs, name)
 				} else {
 					shellArgs = append(shellArgs, ghCommand.name, name)
@@ -91,13 +93,22 @@ and the key separated by a dot, and the value will be escaped.`,
 
 		fullCommand := strings.Join(shellArgs, " ")
 
-		fmt.Printf("\ngit %v\n\nExecute? (Y/n) ", fullCommand)
+		fmt.Println()
+
+		color.Red("git %v", fullCommand)
+
+		fmt.Print("\nExecute? (Y/n) ")
 
 		executeFlag := readString()
 
+		fmt.Println()
+
 		if executeFlag != "n" && executeFlag != "N" {
 			executeShellCommand(shellArgs)
+			fmt.Println()
 		}
+
+		os.Exit(0)
 	},
 }
 
