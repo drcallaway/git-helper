@@ -33,7 +33,7 @@ import (
 var configCommands = []ghCommand{
 	ghCommand{name: "show value", description: "Show config setting for given name."},
 	ghCommand{name: "add/change", description: "Add config setting or change existing. \"user.name\" and \"user.email\" are common settings."},
-	ghCommand{name: "--list", description: "List all config values. Defaults to --local settings."},
+	ghCommand{name: "--list", short: "l", description: "List all config values. Defaults to --local settings."},
 	ghCommand{name: "--show-origin", description: "Source of settings. Requires --list."},
 	ghCommand{name: "--add", description: "Add config setting."},
 	ghCommand{name: "--replace-all", description: "Replace all rows with given name using new value."},
@@ -124,4 +124,10 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// configCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	for _, cmd := range configCommands {
+		if strings.HasPrefix(cmd.name, "--") {
+			ConfigCmd.Flags().BoolP(cmd.name[2:], cmd.short, false, cmd.description)
+		}
+	}
 }

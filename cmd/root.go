@@ -33,29 +33,30 @@ import (
 
 type ghCommand struct {
 	name         string
+	short        string
 	description  string
 	cobraCommand *cobra.Command
 }
 
 var topCommands = []ghCommand{
-	ghCommand{"config", "Set local and global options", ConfigCmd},
-	ghCommand{"init", "Create or re-initialize a git repository", nil},
-	ghCommand{"clone", "", nil},
-	ghCommand{"status", "", nil},
-	ghCommand{"add", "", nil},
-	ghCommand{"commit", "", nil},
-	ghCommand{"pull", "", nil},
-	ghCommand{"push", "", nil},
-	ghCommand{"branch", "", nil},
-	ghCommand{"checkout", "", nil},
-	ghCommand{"stash", "", nil},
-	ghCommand{"merge", "", nil},
-	ghCommand{"rebase", "", nil},
-	ghCommand{"reset", "", nil},
-	ghCommand{"remote", "", nil},
-	ghCommand{"fetch", "", nil},
-	ghCommand{"unstage", "", nil},
-	ghCommand{"task", "Not a git command. Show available tasks.", nil},
+	ghCommand{name: "config", description: "Set local and global options", cobraCommand: ConfigCmd},
+	ghCommand{name: "init", description: "Create or re-initialize a git repository", cobraCommand: nil},
+	ghCommand{name: "clone", description: "", cobraCommand: nil},
+	ghCommand{name: "status", description: "", cobraCommand: nil},
+	ghCommand{name: "add", description: "", cobraCommand: nil},
+	ghCommand{name: "commit", description: "", cobraCommand: nil},
+	ghCommand{name: "pull", description: "", cobraCommand: nil},
+	ghCommand{name: "push", description: "", cobraCommand: nil},
+	ghCommand{name: "branch", description: "", cobraCommand: nil},
+	ghCommand{name: "checkout", description: "", cobraCommand: nil},
+	ghCommand{name: "stash", description: "", cobraCommand: nil},
+	ghCommand{name: "merge", description: "", cobraCommand: nil},
+	ghCommand{name: "rebase", description: "", cobraCommand: nil},
+	ghCommand{name: "reset", description: "", cobraCommand: nil},
+	ghCommand{name: "remote", description: "", cobraCommand: nil},
+	ghCommand{name: "fetch", description: "", cobraCommand: nil},
+	ghCommand{name: "unstage", description: "", cobraCommand: nil},
+	ghCommand{name: "task", description: "Not a git command. Show available tasks.", cobraCommand: nil},
 }
 
 var ghMap = createGhMap(topCommands)
@@ -166,5 +167,16 @@ func executeShellCommand(shellArgs []string) {
 	shellCommand := exec.Command("git", shellArgs...)
 	shellCommand.Stdin = os.Stdin
 	shellCommand.Stdout = os.Stdout
+	shellCommand.Stderr = os.Stderr
 	shellCommand.Run()
+}
+
+func findGhCommand(commands []ghCommand, name string) (ghCommand, bool) {
+	for _, cmd := range commands {
+		if cmd.name == name {
+			return cmd, true
+		}
+	}
+
+	return ghCommand{}, false
 }
